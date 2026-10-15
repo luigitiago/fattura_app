@@ -1,0 +1,6 @@
+# Runtime dependencies for Faktura Manager.
+# Tkinter is part of the standard library but on Linux you may need to install
+# the system package (e.g. `sudo apt install python3-tk`).
+customtkinter>=5.2.0
+reportlab>=4.0.0
+Pillow>=9.5.0

@@ -1,0 +1,69 @@
+name: Build executables
+
+# Optional: lets you build a Windows .exe (and Linux/macOS binaries) without
+# owning every operating system.  Push a tag or run this workflow manually,
+# then download the artefacts from the "Actions" tab.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+            artifact: FakturaManager.exe
+            icon: assets/icon.ico
+          - os: ubuntu-latest
+            name: linux
+            artifact: FakturaManager
+            icon: assets/icon.png
+          - os: macos-latest
+            name: macos
+            artifact: FakturaManager
+            icon: assets/icon.ico
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed \
+            --name FakturaManager \
+            --icon "${{ matrix.icon }}" \
+            --collect-all customtkinter \
+            --add-data "assets:assets" \
+            main.py
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed `
+            --name FakturaManager `
+            --icon "${{ matrix.icon }}" `
+            --collect-all customtkinter `
+            --add-data "assets;assets" `
+            main.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FakturaManager-${{ matrix.name }}
+          path: dist/
