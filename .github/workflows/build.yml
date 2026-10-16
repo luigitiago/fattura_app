@@ -1,14 +1,21 @@
 name: Build executables
 
-# Optional: lets you build a Windows .exe (and Linux/macOS binaries) without
-# owning every operating system.  Push a tag or run this workflow manually,
-# then download the artefacts from the "Actions" tab.
+# Build a standalone executable for Windows, Linux and macOS.
+#
+# - Push a tag like v1.0.0  -> a GitHub Release is created with the files attached.
+# - Or run it manually from the "Actions" tab -> download the artefacts.
 
 on:
   workflow_dispatch:
   push:
+    branches:
+      - master
+      - main
     tags:
       - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -18,15 +25,12 @@ jobs:
         include:
           - os: windows-latest
             name: windows
-            artifact: FakturaManager.exe
             icon: assets/icon.ico
           - os: ubuntu-latest
             name: linux
-            artifact: FakturaManager
             icon: assets/icon.png
           - os: macos-latest
             name: macos
-            artifact: FakturaManager
             icon: assets/icon.ico
 
     runs-on: ${{ matrix.os }}
@@ -63,7 +67,23 @@ jobs:
             --add-data "assets;assets" `
             main.py
 
+      - name: Rename artefact per platform
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp dist/FakturaManager.exe "dist/FakturaManager-windows.exe"
+          else
+            cp dist/FakturaManager "dist/FakturaManager-${{ matrix.name }}"
+          fi
+
       - uses: actions/upload-artifact@v4
         with:
           name: FakturaManager-${{ matrix.name }}
-          path: dist/
+          path: |
+            dist/FakturaManager-*
+
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/FakturaManager-*

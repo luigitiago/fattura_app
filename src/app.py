@@ -16,6 +16,7 @@ from .ui.dashboard import DashboardPage
 from .ui.invoice_form import InvoiceFormPage
 from .ui.invoices_view import InvoicesPage
 from .ui.settings_view import SettingsPage
+from .ui.welcome import WelcomeDialog
 
 APP_VERSION = "1.0.0"
 
@@ -47,6 +48,7 @@ class FakturaApp(ctk.CTk):
         self._build_layout()
         self.show_page("dashboard")
         self.protocol("WM_DELETE_WINDOW", self._on_close)
+        self.after(400, self._maybe_first_run)
 
     # ------------------------------------------------------------- startup
     def _import_legacy(self):
@@ -166,6 +168,20 @@ class FakturaApp(ctk.CTk):
 
     def refresh_current_page(self):
         self.show_page(self.current_page_name, **self.current_page_kwargs)
+
+    # --------------------------------------------------------- first run
+    def _maybe_first_run(self):
+        """Show a friendly prompt the very first time the app is started."""
+        if os.environ.get("FAKTURA_SELFTEST"):
+            return
+        if not self.config.get("first_run", default=True):
+            return
+        self.config.set(False, "first_run")
+        self.config.save()
+        issuer = self.config.get("issuer", default={}) or {}
+        if utils.is_app_configured(issuer):
+            return
+        WelcomeDialog(self, self, on_open_settings=lambda: self.show_page("settings"))
 
     # ------------------------------------------------------------- language
     def _on_language_switch(self, value: str):

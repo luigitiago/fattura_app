@@ -145,6 +145,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "form.status": "Status",
         "form.notes": "Hinweise / Zahlungstext",
         "form.item.description": "Beschreibung",
+        "form.item.code": "Ziffer",
         "form.item.quantity": "Menge",
         "form.item.unit": "Einheit",
         "form.item.unit_price": "Einzelpreis",
@@ -192,6 +193,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "pdf.due_date": "Fällig am",
         "pdf.bill_to": "Rechnung an",
         "pdf.col.pos": "Pos.",
+        "pdf.col.code": "Ziffer",
         "pdf.col.description": "Beschreibung",
         "pdf.col.qty": "Menge",
         "pdf.col.unit": "Einheit",
@@ -290,6 +292,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "status.overdue": "Überfällig",
         "status.cancelled": "Storniert",
         "status.draft": "Entwurf",
+
+        # export
+        "export.button": "Export CSV",
+        "export.invoices_title": "Rechnungen exportieren",
+        "export.clients_title": "Kunden exportieren",
+        "export.saved": "Export gespeichert:\n{path}",
+        "export.empty": "Keine Daten zum Exportieren vorhanden.",
+        "export.csv_filter": "CSV-Datei",
+
+        # welcome / first run
+        "welcome.title": "Willkommen beim Faktura Manager",
+        "welcome.text": "Bevor du die erste Rechnung erstellst, solltest du deine Firmendaten hinterlegen (Name, Adresse, Bank, Steuernummer).\n\nEinstellungen jetzt öffnen?",
+        "welcome.create_sample": "Beispieldaten anlegen",
 
         # misc
         "misc.currency_symbol": "€",
@@ -424,6 +439,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "form.status": "Stato",
         "form.notes": "Note / testo di pagamento",
         "form.item.description": "Descrizione",
+        "form.item.code": "Codice",
         "form.item.quantity": "Quantità",
         "form.item.unit": "Unità",
         "form.item.unit_price": "Prezzo unitario",
@@ -469,6 +485,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "pdf.due_date": "Scadenza",
         "pdf.bill_to": "Fatturare a",
         "pdf.col.pos": "Pos.",
+        "pdf.col.code": "Codice",
         "pdf.col.description": "Descrizione",
         "pdf.col.qty": "Q.tà",
         "pdf.col.unit": "Unità",
@@ -564,6 +581,17 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "status.overdue": "Scaduta",
         "status.cancelled": "Annullata",
         "status.draft": "Bozza",
+
+        "export.button": "Esporta CSV",
+        "export.invoices_title": "Esporta fatture",
+        "export.clients_title": "Esporta clienti",
+        "export.saved": "Esportazione salvata:\n{path}",
+        "export.empty": "Nessun dato da esportare.",
+        "export.csv_filter": "File CSV",
+
+        "welcome.title": "Benvenuto in Faktura Manager",
+        "welcome.text": "Prima di creare la prima fattura, ti conviene inserire i dati della tua azienda (nome, indirizzo, banca, partita IVA).\n\nApro ora le Impostazioni?",
+        "welcome.create_sample": "Crea dati di esempio",
 
         "misc.currency_symbol": "€",
         "misc.yes_no": "{value}",

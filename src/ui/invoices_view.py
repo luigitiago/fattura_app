@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import os
 import threading
+from tkinter import filedialog
 
 import customtkinter as ctk
 
-from .. import database, mailer, pdf_generator, utils
+from .. import database, exporter, mailer, pdf_generator, utils
 from . import components as ui
 from .base import Page
 
@@ -25,7 +26,10 @@ class InvoicesPage(Page):
         tr = self.tr
         self.current_filter = "all"
         self.header(tr.t("inv.title"), tr.t("inv.subtitle"),
-                    actions=[(f"＋ {tr.t('inv.new')}", lambda: self.app.show_page("invoice_form"))])
+                    actions=[
+                        (tr.t("export.button"), self._export_csv, ui.GRAY, ui.GRAY_HOVER),
+                        (f"＋ {tr.t('inv.new')}", lambda: self.app.show_page("invoice_form")),
+                    ])
 
         controls = ctk.CTkFrame(self, fg_color="transparent")
         controls.pack(fill="x", pady=(0, 10))
@@ -68,6 +72,24 @@ class InvoicesPage(Page):
             return
         for inv in invoices:
             self._row(inv)
+
+    def _export_csv(self):
+        tr = self.tr
+        invoices = self.db.list_invoices()
+        if not invoices:
+            ui.warn(self.app, tr.t("common.warning"), tr.t("export.empty"))
+            return
+        default = os.path.join(utils.documents_dir(), f"Rechnungen_{utils.today().isoformat()}.csv")
+        path = filedialog.asksaveasfilename(
+            parent=self.app, title=tr.t("export.invoices_title"), defaultextension=".csv",
+            initialfile=os.path.basename(default), initialdir=os.path.dirname(default),
+            filetypes=[(tr.t("export.csv_filter"), "*.csv")])
+        if not path:
+            return
+        currency = self.config.get("currency", default="€")
+        exporter.export_invoices(invoices, path, tr, currency)
+        if ui.confirm(self.app, tr.t("common.success"), tr.t("export.saved", path=path)):
+            utils.open_path(path)
 
     def _row(self, inv):
         tr = self.tr

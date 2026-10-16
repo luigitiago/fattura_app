@@ -181,8 +181,13 @@ def generate_invoice_pdf(invoice: dict, config, tr, output_path: str) -> str:
     story.append(Spacer(1, 14))
 
     # ---------------------------------------------------------- items table
-    head = [
-        Paragraph(tr.t("pdf.col.pos"), ss["CellHead"]),
+    items = invoice.get("items", [])
+    has_code = any((item.get("code") or "").strip() for item in items)
+
+    head = [Paragraph(tr.t("pdf.col.pos"), ss["CellHead"])]
+    if has_code:
+        head.append(Paragraph(tr.t("pdf.col.code"), ss["CellHead"]))
+    head += [
         Paragraph(tr.t("pdf.col.description"), ss["CellHead"]),
         Paragraph(tr.t("pdf.col.qty"), ss["CellHeadR"]),
         Paragraph(tr.t("pdf.col.unit"), ss["CellHead"]),
@@ -190,20 +195,26 @@ def generate_invoice_pdf(invoice: dict, config, tr, output_path: str) -> str:
         Paragraph(tr.t("pdf.col.total"), ss["CellHeadR"]),
     ]
     data = [head]
-    for idx, item in enumerate(invoice.get("items", []), start=1):
+    for idx, item in enumerate(items, start=1):
         qty = float(item.get("quantity") or 0)
         price = float(item.get("unit_price") or 0)
         line = qty * price
-        data.append([
-            Paragraph(str(idx), ss["Block"]),
+        row_cells = [Paragraph(str(idx), ss["Block"])]
+        if has_code:
+            row_cells.append(Paragraph(item.get("code") or "", ss["Block"]))
+        row_cells += [
             Paragraph((item.get("description") or "").replace("\n", "<br/>"), ss["Block"]),
             Paragraph(utils.format_qty(qty), ss["CellRight"]),
             Paragraph(item.get("unit") or "", ss["Block"]),
             Paragraph(money(price), ss["CellRight"]),
             Paragraph(money(line), ss["CellRight"]),
-        ])
+        ]
+        data.append(row_cells)
 
-    col_widths = [12 * mm, 78 * mm, 16 * mm, 18 * mm, 24 * mm, 22 * mm]
+    if has_code:
+        col_widths = [10 * mm, 16 * mm, 66 * mm, 15 * mm, 17 * mm, 23 * mm, 21 * mm]
+    else:
+        col_widths = [12 * mm, 78 * mm, 16 * mm, 18 * mm, 24 * mm, 22 * mm]
     items_table = Table(data, colWidths=col_widths, repeatRows=1)
     style = [
         ("BACKGROUND", (0, 0), (-1, 0), DARK),

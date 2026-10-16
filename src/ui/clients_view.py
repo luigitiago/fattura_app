@@ -1,8 +1,12 @@
 """Clients page: list, search and create/edit dialog."""
 from __future__ import annotations
 
+import os
+from tkinter import filedialog
+
 import customtkinter as ctk
 
+from .. import exporter, utils
 from . import components as ui
 from .base import Page
 
@@ -148,7 +152,10 @@ class ClientsPage(Page):
         tr = self.tr
         self.search = ""
         self.header(tr.t("clients.title"), tr.t("clients.subtitle"),
-                    actions=[(f"＋ {tr.t('clients.add')}", self._new_client)])
+                    actions=[
+                        (tr.t("export.button"), self._export_csv, ui.GRAY, ui.GRAY_HOVER),
+                        (f"＋ {tr.t('clients.add')}", self._new_client),
+                    ])
 
         search_bar = ctk.CTkFrame(self, fg_color="transparent")
         search_bar.pack(fill="x", pady=(0, 12))
@@ -165,6 +172,23 @@ class ClientsPage(Page):
 
     def _new_client(self):
         ClientDialog(self.app, self.app, on_saved=self._reload)
+
+    def _export_csv(self):
+        tr = self.tr
+        clients = self.db.list_clients()
+        if not clients:
+            ui.warn(self.app, tr.t("common.warning"), tr.t("export.empty"))
+            return
+        default = os.path.join(utils.documents_dir(), f"Kunden_{utils.today().isoformat()}.csv")
+        path = filedialog.asksaveasfilename(
+            parent=self.app, title=tr.t("export.clients_title"), defaultextension=".csv",
+            initialfile=os.path.basename(default), initialdir=os.path.dirname(default),
+            filetypes=[(tr.t("export.csv_filter"), "*.csv")])
+        if not path:
+            return
+        exporter.export_clients(clients, path, tr)
+        if ui.confirm(self.app, tr.t("common.success"), tr.t("export.saved", path=path)):
+            utils.open_path(path)
 
     def _edit_client(self, client_id):
         client = self.db.get_client(client_id)

@@ -28,34 +28,39 @@ class ItemRow:
         self.form = form
         self.frame = ctk.CTkFrame(parent, fg_color=("gray90", "gray18"), corner_radius=8)
         self.frame.pack(fill="x", pady=3)
-        for col, weight in enumerate([6, 1, 2, 2, 2, 0]):
+        for col, weight in enumerate([2, 5, 1, 2, 2, 2, 0]):
             self.frame.grid_columnconfigure(col, weight=weight)
 
         data = data or {}
+        self.code = ctk.CTkEntry(self.frame, width=90, placeholder_text=form.tr.t("form.item.code"))
+        self.code.grid(row=0, column=0, sticky="ew", padx=(8, 4), pady=6)
+        if data.get("code"):
+            self.code.insert(0, data["code"])
+
         self.desc = ctk.CTkEntry(self.frame, placeholder_text=form.tr.t("form.item.description"))
-        self.desc.grid(row=0, column=0, sticky="ew", padx=(8, 4), pady=6)
+        self.desc.grid(row=0, column=1, sticky="ew", padx=4, pady=6)
         if data.get("description"):
             self.desc.insert(0, data["description"])
 
         self.qty = ctk.CTkEntry(self.frame, width=70)
-        self.qty.grid(row=0, column=1, sticky="ew", padx=4, pady=6)
+        self.qty.grid(row=0, column=2, sticky="ew", padx=4, pady=6)
         self.qty.insert(0, utils.format_qty(data.get("quantity", 1)))
 
         self.unit = ctk.CTkComboBox(self.frame, width=110, values=UNITS.get(form.tr.lang, UNITS["de"]))
-        self.unit.grid(row=0, column=2, sticky="ew", padx=4, pady=6)
+        self.unit.grid(row=0, column=3, sticky="ew", padx=4, pady=6)
         self.unit.set(data.get("unit", "") or "")
 
         self.price = ctk.CTkEntry(self.frame, width=110, placeholder_text="0,00")
-        self.price.grid(row=0, column=3, sticky="ew", padx=4, pady=6)
+        self.price.grid(row=0, column=4, sticky="ew", padx=4, pady=6)
         if data.get("unit_price") is not None:
             self.price.insert(0, utils.format_qty(data.get("unit_price")))
 
         self.line_label = ctk.CTkLabel(self.frame, text="0,00", anchor="e", width=90,
                                        font=ctk.CTkFont(size=12, weight="bold"))
-        self.line_label.grid(row=0, column=4, sticky="e", padx=4, pady=6)
+        self.line_label.grid(row=0, column=5, sticky="e", padx=4, pady=6)
 
         ctk.CTkButton(self.frame, text="✕", width=32, fg_color=ui.RED, hover_color=ui.RED_HOVER,
-                      command=lambda: form.remove_item(self)).grid(row=0, column=5, padx=(2, 8), pady=6)
+                      command=lambda: form.remove_item(self)).grid(row=0, column=6, padx=(2, 8), pady=6)
 
         for widget in (self.qty, self.price):
             widget.bind("<KeyRelease>", lambda e: form.update_totals())
@@ -72,6 +77,7 @@ class ItemRow:
             raise ValueError(self.form.tr.t("form.invalid_number", row=self.frame.grid_info().get("row", "?")))
         return {
             "description": desc,
+            "code": self.code.get().strip(),
             "quantity": qty,
             "unit": self.unit.get().strip(),
             "unit_price": price,
@@ -227,9 +233,9 @@ class InvoiceFormPage(Page):
 
         head = ctk.CTkFrame(card.body, fg_color="transparent")
         head.pack(fill="x")
-        headers = [tr.t("form.item.description"), tr.t("form.item.quantity"), tr.t("form.item.unit"),
-                   tr.t("form.item.unit_price"), tr.t("form.item.total"), ""]
-        for col, (text, weight) in enumerate(zip(headers, [6, 1, 2, 2, 2, 0])):
+        headers = [tr.t("form.item.code"), tr.t("form.item.description"), tr.t("form.item.quantity"),
+                   tr.t("form.item.unit"), tr.t("form.item.unit_price"), tr.t("form.item.total"), ""]
+        for col, (text, weight) in enumerate(zip(headers, [2, 5, 1, 2, 2, 2, 0])):
             head.grid_columnconfigure(col, weight=weight)
             ctk.CTkLabel(head, text=text, anchor="w", text_color=("gray40", "gray65"),
                          font=ctk.CTkFont(size=11, weight="bold")).grid(row=0, column=col, sticky="w", padx=6)

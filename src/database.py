@@ -13,7 +13,7 @@ from datetime import date
 
 from . import utils
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 STATUS_OPEN = "open"
 STATUS_PAID = "paid"
@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     invoice_id  INTEGER NOT NULL,
     position    INTEGER DEFAULT 0,
     description TEXT,
+    code        TEXT,
     quantity    REAL DEFAULT 1,
     unit        TEXT,
     unit_price  REAL DEFAULT 0,
@@ -85,11 +86,25 @@ class Database:
     # -------------------------------------------------------------- schema
     def _init_schema(self) -> None:
         self.conn.executescript(SCHEMA)
+        self._migrate()
         self.conn.execute(
             "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)",
             (str(SCHEMA_VERSION),),
         )
         self.conn.commit()
+
+    def _migrate(self) -> None:
+        """Bring older databases up to date without losing data."""
+        # v2 -> v3: optional service code on invoice items
+        self._ensure_column("invoice_items", "code", "TEXT")
+        self._ensure_column("invoices", "paid_date", "TEXT")
+        self._ensure_column("invoices", "updated_at", "TEXT")
+
+    def _ensure_column(self, table: str, column: str, ddl: str) -> None:
+        existing = {row["name"] for row in self.conn.execute(f"PRAGMA table_info({table})").fetchall()}
+        if column not in existing:
+            self.conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
+            self.conn.commit()
 
     def close(self) -> None:
         try:
@@ -248,12 +263,13 @@ class Database:
         for pos, item in enumerate(items):
             self.conn.execute(
                 """INSERT INTO invoice_items
-                   (invoice_id, position, description, quantity, unit, unit_price)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
+                   (invoice_id, position, description, code, quantity, unit, unit_price)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (
                     invoice_id,
                     pos,
                     item.get("description", ""),
+                    item.get("code", ""),
                     float(item.get("quantity") or 0),
                     item.get("unit", ""),
                     float(item.get("unit_price") or 0),

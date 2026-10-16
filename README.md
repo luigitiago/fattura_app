@@ -15,10 +15,11 @@ pensata per essere semplice da usare e distribuibile tramite **chiavetta USB**.
 - **Clienti**: privati e aziende (ragione sociale, referente, indirizzo, email, telefono,
   Partita IVA / USt-IdNr., numero assicurativo, note). Ricerca istantanea.
 - **Fatture**: numero progressivo automatico, date (emissione / prestazione / scadenza),
-  voci multiple (descrizione, quantità, unità, prezzo), calcolo automatico di netto, IVA
-  e totale. Filtri per stato (aperte / pagate / scadute / annullate / bozza).
+  voci multiple (codice prestazione, descrizione, quantità, unità, prezzo), calcolo
+  automatico di netto, IVA e totale. Filtri per stato (aperte / pagate / scadute / annullate / bozza).
 - **PDF professionale** conforme ai requisiti tedeschi, pronto per la stampa.
 - **Invio email** opzionale con PDF allegato (SMTP configurabile).
+- **Esportazione CSV** di fatture e clienti (compatibile con Excel tedesco/italiano).
 - **Gestione pagamenti**: segna una fattura come pagata/aperta; le scadute vengono
   evidenziate automaticamente confrontando la data di scadenza con oggi.
 - **IVA flessibile**: *Kleinunternehmer §19 UStG* (senza IVA), 19%, 7% o aliquota personalizzata.
@@ -84,6 +85,10 @@ La prima esecuzione è leggermente più lenta (l'app si scompatta in una cartell
 Se non hai un PC Windows, puoi generare l'eseguibile `.exe` usando il workflow incluso
 `.github/workflows/build.yml`: carica il progetto su GitHub, poi dalla scheda **Actions**
 avvia il workflow *Build executables* e scarica l'artefatto `FakturaManager-windows`.
+Facendo push di un tag (es. `v1.0.0`) viene creata automaticamente una **Release** con
+tutti gli eseguibili allegati.
+
+Per i dettagli (build, USB, antivirus) vedi **[`packaging/README.md`](packaging/README.md)**.
 
 ---
 
@@ -167,17 +172,30 @@ Fattura-app/
 ├── src/
 │   ├── app.py                 # finestra principale, menu, navigazione, lingua
 │   ├── config.py              # impostazioni persistenti (JSON)
-│   ├── database.py            # livello SQLite
+│   ├── database.py            # livello SQLite (+ migrazioni schema)
+│   ├── exporter.py            # esportazione CSV
 │   ├── i18n.py                # traduzioni IT/DE
 │   ├── pdf_generator.py       # creazione PDF (reportlab)
 │   ├── mailer.py              # invio email (SMTP)
 │   ├── utils.py               # percorsi, formattazione, integrazione OS
 │   └── ui/                    # pagine e dialoghi (CustomTkinter)
 ├── assets/                    # icona
-├── packaging/                 # script di build + launcher portatili
+├── packaging/                 # script di build + launcher portatili + guida
+├── tests/                     # test automatici (logica, GUI, flussi, nuove funzioni)
 ├── legacy/                    # vecchio prototipo (fattura.py)
 └── krankenkasse.db            # database legacy (importato al primo avvio, se presente)
 ```
+
+---
+
+## Test automatici (sviluppo)
+
+```bash
+./tests/run_all.sh
+```
+
+Esegue: logica di base + PDF, migrazioni/CSV, flussi end-to-end e uno smoke test
+grafico. I test usano una cartella dati temporanea e non toccano i dati reali.
 
 ---
 
@@ -204,6 +222,9 @@ von Rechnungen (**Deutsch / Italiano**), inklusive Kundenverwaltung und Zahlungs
 - **Daten**: liegen unter `%APPDATA%\FakturaManager\` (Windows) und überleben das
   Entfernen des USB-Sticks. Backup = diesen Ordner kopieren.
 - **Erste Schritte**: unter **Einstellungen** Firma, Bank und Steuernummer eintragen,
-  dann Kunden anlegen und die erste Rechnung erstellen.
+  dann Kunden anlegen und die erste Rechnung erstellen. Beim ersten Start öffnet sich
+  ein Willkommensdialog, der direkt zu den Einstellungen führt.
+- **Weitere Funktionen**: optionale **Leistungsziffer** je Position (erscheint im PDF),
+  **CSV-Export** von Rechnungen und Kunden (Excel-kompatibel, `;`-getrennt).
 
 Version 1.0.0

@@ -12,6 +12,7 @@ DEFAULT_CONFIG: dict = {
     "language": "de",
     "appearance": "System",  # System | Light | Dark
     "currency": "€",
+    "first_run": True,
     "issuer": {
         "name": "",
         "street": "",
