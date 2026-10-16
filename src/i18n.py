@@ -284,6 +284,17 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "set.data.folder": "Datenordner",
         "set.data.open_folder": "Ordner öffnen",
         "set.data.db": "Datenbankdatei",
+        "set.data.sample": "Beispieldaten anlegen",
+        "set.data.sample_confirm": "Es werden 3 Beispielkunden und 3 Beispielrechnungen hinzugefügt (Präfix BEISPIEL). Diese können später gelöscht werden.\n\nFortfahren?",
+        "set.data.sample_done": "Beispieldaten angelegt:\n{clients} Kunden, {invoices} Rechnungen.",
+
+        # sample / example data
+        "sample.prefix": "BEISPIEL",
+        "sample.note_private": "Beispielkunde – kann gelöscht werden.",
+        "sample.item1": "Krankengymnastik",
+        "sample.item2": "Massage",
+        "sample.item3": "Beratung",
+        "sample.invoice_note": "Beispielrechnung – kann gelöscht werden.",
         "set.saved": "Einstellungen gespeichert.",
 
         # status labels
@@ -574,6 +585,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         "set.data.folder": "Cartella dati",
         "set.data.open_folder": "Apri cartella",
         "set.data.db": "File database",
+        "set.data.sample": "Crea dati di esempio",
+        "set.data.sample_confirm": "Verranno aggiunti 3 clienti e 3 fatture di esempio (prefisso ESEMPIO). Potrai eliminarli in seguito.\n\nContinuare?",
+        "set.data.sample_done": "Dati di esempio creati:\n{clients} clienti, {invoices} fatture.",
+
+        "sample.prefix": "ESEMPIO",
+        "sample.note_private": "Cliente di esempio – può essere eliminato.",
+        "sample.item1": "Fisioterapia",
+        "sample.item2": "Massaggio",
+        "sample.item3": "Consulenza",
+        "sample.invoice_note": "Fattura di esempio – può essere eliminata.",
         "set.saved": "Impostazioni salvate.",
 
         "status.open": "Aperta",

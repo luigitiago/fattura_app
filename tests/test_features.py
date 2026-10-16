@@ -148,6 +148,23 @@ def test_kleinunternehmer_note():
     db.close()
 
 
+def test_sample_data():
+    from src import sample_data
+    cfg = Config()
+    cfg.set("Praxis", "issuer", "name")
+    db = Database(os.path.join(tmp, "s.db"))
+    tr = I18n("de")
+    n = sample_data.create_sample_data(db, cfg, tr)
+    check("sample data: 3 invoices", n == 3)
+    check("sample data: 3 clients", len(db.list_clients()) == 3)
+    invoices = db.list_invoices()
+    check("sample data: invoice list", len(invoices) == 3)
+    check("sample data: prefixed numbers", all(i["number"].startswith("BEISPIEL") for i in invoices))
+    statuses = sorted(i["display_status"] for i in invoices)
+    check("sample data: has paid + overdue", "paid" in statuses and "overdue" in statuses)
+    db.close()
+
+
 print("== migration ==")
 test_migration()
 print("== pdf with code ==")
@@ -156,6 +173,8 @@ print("== csv export ==")
 test_export()
 print("== kleinunternehmer note ==")
 test_kleinunternehmer_note()
+print("== sample data ==")
+test_sample_data()
 
 print()
 if all(ok):

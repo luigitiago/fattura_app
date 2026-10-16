@@ -30,8 +30,23 @@ class WelcomeDialog(ui.ModalDialog):
                       width=180).pack(side="right")
         ctk.CTkButton(btns, text=tr.t("common.close"), command=self.destroy, width=120,
                       fg_color=ui.GRAY, hover_color=ui.GRAY_HOVER).pack(side="right", padx=8)
+        ctk.CTkButton(btns, text=tr.t("welcome.create_sample"), command=self._create_sample,
+                      width=180, fg_color="transparent", border_width=1,
+                      text_color=("gray20", "gray80")).pack(side="left")
 
     def _open_settings(self):
         self.destroy()
         if self.on_open_settings:
             self.on_open_settings()
+
+    def _create_sample(self):
+        from .. import sample_data
+        try:
+            sample_data.create_sample_data(self.app.db, self.app.config, self.tr)
+        except Exception:  # noqa: BLE001
+            pass
+        self.destroy()
+        try:
+            self.app.refresh_current_page()
+        except Exception:  # noqa: BLE001
+            pass

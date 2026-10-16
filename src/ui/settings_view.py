@@ -6,7 +6,7 @@ from tkinter import filedialog
 
 import customtkinter as ctk
 
-from .. import mailer, utils
+from .. import mailer, sample_data, utils
 from . import components as ui
 from .base import Page
 
@@ -304,8 +304,22 @@ class SettingsPage(Page):
         ctk.CTkButton(card.body, text=tr.t("set.data.open_folder"), width=180, fg_color=ui.GRAY,
                       hover_color=ui.GRAY_HOVER,
                       command=lambda: utils.open_path(utils.user_data_dir())).pack(anchor="w")
+        ctk.CTkButton(card.body, text=tr.t("set.data.sample"), width=180,
+                      command=self._create_sample_data).pack(anchor="w", pady=(10, 0))
 
     # ------------------------------------------------------------- actions
+    def _create_sample_data(self):
+        tr = self.tr
+        if not ui.confirm(self.app, tr.t("set.data.sample"), tr.t("set.data.sample_confirm")):
+            return
+        try:
+            invoices = sample_data.create_sample_data(self.db, self.config, tr)
+        except Exception as exc:  # noqa: BLE001
+            ui.error(self.app, tr.t("common.error"), str(exc))
+            return
+        ui.info(self.app, tr.t("common.success"),
+                tr.t("set.data.sample_done", clients=3, invoices=invoices))
+
     def _test_email(self):
         tr = self.tr
         self._apply_to_config()

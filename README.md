@@ -25,6 +25,7 @@ pensata per essere semplice da usare e distribuibile tramite **chiavetta USB**.
 - **IVA flessibile**: *Kleinunternehmer §19 UStG* (senza IVA), 19%, 7% o aliquota personalizzata.
 - **Lingua** IT/DE cambiabile in qualsiasi momento; tema chiaro/scuro/sistema.
 - **Dati locali** salvati in un database SQLite: nessun cloud, nessun tracciamento.
+- **Dati di esempio** creabili con un clic (Impostazioni → Dati) per vedere subito come funziona.
 
 ---
 
