@@ -1,5 +1,6 @@
 """Tests for the new features: item code, CSV export and schema migration."""
 import os
+import shutil
 import sqlite3
 import sys
 import tempfile
@@ -103,12 +104,58 @@ def test_export():
     db.close()
 
 
+def _pdf_text(inv, cfg, lang="de"):
+    """Generate a PDF and return its extracted text (requires pdftotext)."""
+    path = os.path.join(tmp, f"note_{lang}_{len(ok)}.pdf")
+    pdf_generator.generate_invoice_pdf(inv, cfg, I18n(lang), path)
+    import subprocess
+    try:
+        return subprocess.run(["pdftotext", "-layout", path, "-"], capture_output=True, text=True).stdout
+    except FileNotFoundError:
+        return ""
+
+
+def test_kleinunternehmer_note():
+    """The §19 UStG note must appear only when no VAT is charged."""
+    if not shutil.which("pdftotext"):
+        print("  SKIP  pdftotext not installed")
+        return
+    db = Database(os.path.join(tmp, "k.db"))
+    cid = db.add_client({"type": "private", "name": "Max", "company": "", "contact": "",
+                         "street": "A", "postal": "1", "city": "Berlin", "country": "DE",
+                         "email": "", "phone": "", "vat": "", "insurance": "", "notes": ""})
+
+    # (a) Kleinunternehmer regime, no VAT -> note expected
+    cfg = Config()
+    cfg.set("Praxis", "issuer", "name")
+    cfg.set("kleinunternehmer", "tax", "regime")
+    iid = db.add_invoice({"number": "K-0", "client_id": cid, "issue_date": utils.iso(utils.today()),
+                          "service_date": utils.iso(utils.today()), "due_date": utils.iso(utils.today()),
+                          "status": "open", "vat_rate": 0.0, "notes": ""},
+                         [{"description": "Leistung", "code": "", "quantity": 1, "unit": "Stk", "unit_price": 100.0}])
+    inv = db.get_invoice(iid)
+    inv["client"] = dict(db.get_client(cid))
+    check("§19 note shown when no VAT", "19 UStG" in _pdf_text(inv, cfg))
+
+    # (b) VAT charged -> note must NOT appear, even if regime is Kleinunternehmer
+    iid2 = db.add_invoice({"number": "K-19", "client_id": cid, "issue_date": utils.iso(utils.today()),
+                           "service_date": utils.iso(utils.today()), "due_date": utils.iso(utils.today()),
+                           "status": "open", "vat_rate": 19.0, "notes": ""},
+                          [{"description": "Leistung", "code": "", "quantity": 1, "unit": "Stk", "unit_price": 100.0}])
+    inv2 = db.get_invoice(iid2)
+    inv2["client"] = dict(db.get_client(cid))
+    check("§19 note hidden when VAT charged", "19 UStG" not in _pdf_text(inv2, cfg))
+    db.close()
+
+
 print("== migration ==")
 test_migration()
 print("== pdf with code ==")
 test_pdf_with_code()
 print("== csv export ==")
 test_export()
+print("== kleinunternehmer note ==")
+test_kleinunternehmer_note()
 
 print()
 if all(ok):

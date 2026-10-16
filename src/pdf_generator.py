@@ -256,7 +256,9 @@ def generate_invoice_pdf(invoice: dict, config, tr, output_path: str) -> str:
     story.append(totals_table)
     story.append(Spacer(1, 8))
 
-    if config.is_kleinunternehmer():
+    # The §19 UStG note must only appear when no VAT is charged on this invoice.
+    # (A Kleinunternehmer never charges VAT; if an invoice carries VAT we never print it.)
+    if config.is_kleinunternehmer() and abs(float(vat_rate)) < 1e-9:
         story.append(Paragraph(tr.t("pdf.kleinunternehmer"), ss["Small"]))
     story.append(Spacer(1, 14))
 
